@@ -42,7 +42,8 @@ AC_ARG_ENABLE([developer],
   [AM_CONDITIONAL([BES_DEVELOPER], [true])
    dnl Not used anymore. jhrg 11/28/17 AM_CONDITIONAL([BUILD_HYRAX_DEBUG], [true])
    dnl Only set CXXFLAGS if the caller does not have them set in their environment
-   AS_IF([test -z "${CXXFLAGS+set}"], [CXXFLAGS="-g3 -O0  -Wall -W -Wcast-align"])],
+   AS_IF([test -z "${CXXFLAGS+set}"], [CXXFLAGS="-g3 -O0  -Wall -W -Wcast-align"])
+   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [CXXFLAGS="$CXXFLAGS -fsanitize=address -fno-omit-frame-pointer"])],
   [AM_CONDITIONAL([BES_DEVELOPER], [false])
    dnl AM_CONDITIONAL([BUILD_HYRAX_DEBUG], [false])
    AC_DEFINE([NDEBUG], [1], [Define this to suppress assert() statements.])])
@@ -86,6 +87,19 @@ dnl This seems like it doesn't belong here but in the module, instead.
 dnl TODO. jhrg 11/28/17
 AC_DEFINE([DAPREADER_PACKAGE], ["dapreader_module"], [dapreader_module])
 AC_DEFINE([DAPREADER_VERSION], ["0.0.1"], [0.0.1])
+
+dnl The following is the _best_ way to handle overriding the default 
+dnl values for CXXFLAGS/CFLAGS that is provided by automake and still
+dnl let builders give values on the command line. But... It is not so
+dnl for the BES because there are many Makefile.am files. Abover the values
+dnl are set when we test for --enable-developer using a different hack 
+dnl that enables builders to set the values on the command line.
+dnl
+dnl Suppress the default values automake supplies for these. You can still
+dnl set them on the command line, however. (e.g., ./configure ... CXXFLAGS="-g -o3").
+dnl jhrg 2/6/18
+dnl : ${CFLAGS=""}
+dnl : ${CXXFLAGS=""}
 
 AC_PROG_CC
 AC_PROG_CXX
